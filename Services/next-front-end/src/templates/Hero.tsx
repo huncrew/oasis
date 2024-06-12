@@ -15,7 +15,7 @@ const Hero = () => {
           href: 'https://twitter.com/ixartz',
           text: (
             <>
-              <TwitterLogoIcon className="mr-1 size-5" /> {t('follow_twitter')}
+              hello
             </>
           ),
         }}
