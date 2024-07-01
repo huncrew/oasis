@@ -16,7 +16,9 @@
     "aws-cdk-lib": "2.142.1",
     "constructs": "10.3.0",
     "sst": "^2.43.3",
-    "typescript": "^5.5.2"
+    "typescript": "^5.5.2",
+    "@aws-cdk/cx-api": "^2.0.0",
+    "@serverless-stack/resources": "^0.60.0"
   },
   "workspaces": [
     "services/*"
