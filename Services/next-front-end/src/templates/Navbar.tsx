@@ -1,3 +1,4 @@
+// src/templates/Navbar.tsx
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
@@ -8,8 +9,12 @@ import { Section } from '@/features/landing/Section';
 
 import { Logo } from './Logo';
 
-const Navbar = () => {
-  const t = useTranslations('Navbar');
+type NavbarProps = {
+  namespace: string;
+};
+
+const Navbar = ({ namespace }: NavbarProps) => {
+  const t = useTranslations(namespace);
 
   return (
     <Section className="px-3 py-6">
@@ -21,35 +26,35 @@ const Navbar = () => {
               <LocaleSwitcher />
             </li>
             <li>
-              <Link href="/sign-in">{t('sign_in')}</Link>
+              <Link href="/sign-in">{t('Navbar.sign_in')}</Link>
             </li>
             <li>
               <Link className={buttonVariants()} href="/sign-up">
-                {t('sign_up')}
+                {t('Navbar.sign_up')}
               </Link>
             </li>
           </>
         }
       >
+        {/* <li>
+          <Link href="/">{t('Navbar.product')}</Link>
+        </li> */}
+{/* 
         <li>
-          <Link href="/">{t('product')}</Link>
-        </li>
+          <Link href="/">{t('Navbar.docs')}</Link>
+        </li> */}
 
-        <li>
-          <Link href="/">{t('docs')}</Link>
-        </li>
+        {/* <li>
+          <Link href="/">{t('Navbar.blog')}</Link>
+        </li> */}
 
-        <li>
-          <Link href="/">{t('blog')}</Link>
-        </li>
+        {/* <li>
+          <Link href="/">{t('Navbar.community')}</Link>
+        </li> */}
 
-        <li>
-          <Link href="/">{t('community')}</Link>
-        </li>
-
-        <li>
-          <Link href="/">{t('company')}</Link>
-        </li>
+        {/* <li>
+          <Link href="/">{t('Navbar.company')}</Link>
+        </li> */}
       </CenteredMenu>
     </Section>
   );
