@@ -15,7 +15,7 @@
   "license": "ISC",
   "workspaces": [
     "services/auth-service",
-    "services/front-end",
+    "services/next-front-end",
     "services/listing-service",
     "infra/api-gateway"
   ],
