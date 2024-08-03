@@ -14,7 +14,6 @@
   "author": "",
   "license": "ISC",
   "workspaces": [
-    "services/auth-service",
     "services/next-front-end",
     "services/listing-service",
     "infra/api-gateway"
