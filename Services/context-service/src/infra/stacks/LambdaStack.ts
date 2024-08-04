@@ -22,6 +22,17 @@ export class LambdaStack extends Stack {
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id, props);
 
+
+    // apigw lambda
+    this.contextHandler = new NodejsFunction(this, 'ApigwHandler', {
+      entry: `${props.lambdaCodePath}/apigw-requests/handlers/stripe.ts`,
+      environment: {
+        STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+      },
+    });
+
+
+
     const queueUrl = props.myQueue.queueUrl;
 
     // PROJECT CONTEXT LAMBDA
