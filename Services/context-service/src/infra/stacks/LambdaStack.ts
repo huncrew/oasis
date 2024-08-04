@@ -9,8 +9,8 @@ import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 
 export interface LambdaStackProps extends StackProps {
   lambdaCodePath: string;
-  projectContextTable: Table; 
-  myQueue: Queue; 
+  // projectContextTable: Table; 
+  // myQueue: Queue; 
 }
 
 export class LambdaStack extends Stack {
@@ -27,6 +27,12 @@ export class LambdaStack extends Stack {
       environment: {
         STRIPE_SECRET_KEY: config.STRIPE_SECRET_KEY,
       },
+    });
+
+    // Output the lambda function ARN
+    new CfnOutput(this, 'ApigwHandlerOutput', {
+      value: this.apigwHandler.functionArn,
+      exportName: 'ContextService-ApigwHandlerOutput',
     });
 
     // // GENERATE AI
