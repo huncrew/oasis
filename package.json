@@ -1,5 +1,5 @@
 {
-  "name": "football-aws-be",
+  "name": "oasify",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -15,7 +15,7 @@
   "license": "ISC",
   "workspaces": [
     "services/next-front-end",
-    "services/listing-service",
+    "services/context-service",
     "infra/api-gateway"
   ],
   "devDependencies": {
