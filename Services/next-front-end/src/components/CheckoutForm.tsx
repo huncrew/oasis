@@ -17,7 +17,7 @@ type CheckoutFormProps = {
 
 const CheckoutForm: React.FC<CheckoutFormProps>  = ({ priceId }) => {
   const fetchClientSecret = useCallback(() => {
-    return fetch("/api/checkout_sessions", {
+    return fetch(`${process.env.NEXT_PUBLIC_AWS_API_URL}/stripe-checkout`, {
       method: "POST",
       headers: {
         'Content-Type': 'application/json',

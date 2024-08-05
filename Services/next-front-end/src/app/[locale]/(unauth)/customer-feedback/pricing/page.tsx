@@ -44,7 +44,7 @@ const Pricing: React.FC<PricingProps> = ({ namespace = 'CustomerFeedback' }) => 
                     size: 'sm',
                     className: 'mt-5 w-full',
                   })}
-                  onClick={() => handleCheckout('price_free')}
+                  onClick={() => handleCheckout('price_1Pk2KQAKEBrNWdgLh7EAInYi')} 
                 >
                   {t('Pricing.button_text')}
                 </button>
@@ -55,7 +55,7 @@ const Pricing: React.FC<PricingProps> = ({ namespace = 'CustomerFeedback' }) => 
                     size: 'sm',
                     className: 'mt-5 w-full',
                   })}
-                  onClick={() => handleCheckout('price_premium')}
+                  onClick={() => handleCheckout('price_1Pk2KuAKEBrNWdgL2qcoN3xI')}
                 >
                   {t('Pricing.button_text')}
                 </button>
@@ -66,7 +66,7 @@ const Pricing: React.FC<PricingProps> = ({ namespace = 'CustomerFeedback' }) => 
                     size: 'sm',
                     className: 'mt-5 w-full',
                   })}
-                  onClick={() => handleCheckout('price_enterprise')}
+                  onClick={() => handleCheckout('price_1Pk2L9AKEBrNWdgLwi7JxWxU')}
                 >
                   {t('Pricing.button_text')}
                 </button>
