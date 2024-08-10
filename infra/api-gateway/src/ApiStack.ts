@@ -41,6 +41,7 @@ export class ApiStack extends Stack {
 
     // stripe
     const stepCreateResource = this.api.root.addResource('stripe-checkout');
+    
     stepCreateResource.addMethod(
       'POST',
       new LambdaIntegration(authHandler),
@@ -49,6 +50,7 @@ export class ApiStack extends Stack {
     // // STEP STATUS CHECK
     // const stepStatusCheckResource =
     //   this.api.root.addResource('step-status-check');
+
     // const sessionResource = stepStatusCheckResource
     //   .addResource('{sessionId}')
     //   .addResource('{taskId}');
