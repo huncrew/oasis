@@ -16,16 +16,26 @@ type CheckoutFormProps = {
   };
 
 const CheckoutForm: React.FC<CheckoutFormProps>  = ({ priceId }) => {
-  const fetchClientSecret = useCallback(() => {
-    return fetch(`${process.env.NEXT_PUBLIC_AWS_API_URL}/stripe-checkout`, {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ priceId }),
-    })
-    .then((res) => res.json())
-    .then((data) => data.clientSecret);
+  const fetchClientSecret = useCallback(async () => {
+    console.log('function being called - fetchClient');
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AWS_API_URL}/stripe-checkout`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ priceId }),
+      });
+  
+      const data = await response.json();
+      console.log('clientSecret:', data.clientSecret); // Log the clientSecret to check its value and type
+      console.log('typeof', data.clientSecret);
+  
+      return data.clientSecret;
+    } catch (error) {
+      console.error('Error fetching clientSecret:', error);
+      throw error; // Re-throw the error to ensure it's handled appropriately
+    }
   }, [priceId]);
 
   const options = { fetchClientSecret };

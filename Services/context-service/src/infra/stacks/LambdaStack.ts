@@ -29,6 +29,12 @@ export class LambdaStack extends Stack {
       },
     });
 
+    this.apigwHandler.addPermission('GenerateAIInvokePermission', {
+      principal: new ServicePrincipal('apigateway.amazonaws.com'),
+      action: 'lambda:InvokeFunction',
+      sourceArn: `arn:aws:execute-api:${this.region}:${this.account}:*/*/*/*`,
+    });
+
     // Output the lambda function ARN
     new CfnOutput(this, 'ApigwHandlerOutput', {
       value: this.apigwHandler.functionArn,
