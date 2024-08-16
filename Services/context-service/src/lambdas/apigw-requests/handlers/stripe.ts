@@ -22,13 +22,6 @@ exports.handler = async (event) => {
       return_url: `${event.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
     });
 
-
-    console.log('successful session created, whats being returned?');
-
-    console.log('consoling the client secret below');
-    console.log(session);
-    console.log(session.client_secret)
-
     return {
       statusCode: 200,
       body: JSON.stringify({ clientSecret: session.client_secret }),
