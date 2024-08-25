@@ -3,7 +3,7 @@
 const Stripe = require('stripe');
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-exports.handler = async (event) => {
+export const stripeHandler = async (event) => {
   const { priceId } = JSON.parse(event.body);
 
   console.log('whats the price id?', priceId)
