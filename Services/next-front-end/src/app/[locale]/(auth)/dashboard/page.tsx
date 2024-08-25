@@ -5,6 +5,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { ProtectFallback } from '@/features/auth/ProtectFallback';
 import { MessageState } from '@/features/dashboard/MessageState';
 import { TitleBar } from '@/features/dashboard/TitleBar';
+import { FileUpload } from '@/features/dashboard/CSVUpload'
 import { ORG_ROLE } from '@/types/Auth';
 
 const DashboardIndexPage = () => {
@@ -13,8 +14,7 @@ const DashboardIndexPage = () => {
   return (
     <>
       <TitleBar
-        title={t('title_bar')}
-        description={t('title_bar_description')}
+        title='Dashboard'
       />
 
       <MessageState
@@ -30,39 +30,10 @@ const DashboardIndexPage = () => {
             <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3M12 12l8-4.5M12 12v9M12 12L4 7.5" />
           </svg>
         }
-        title={t('message_state_title')}
-        description={t.rich('message_state_description', {
-          code: (chunks) => (
-            <code className="bg-secondary text-secondary-foreground">
-              {chunks}
-            </code>
-          ),
-        })}
+        title='Your Dashboard'
+        description='Upload your CV data'
         button={
-          <Protect
-            role={ORG_ROLE.ADMIN}
-            fallback={
-              <ProtectFallback
-                trigger={
-                  <div
-                    className={buttonVariants({
-                      size: 'lg',
-                      variant: 'secondary',
-                    })}
-                  >
-                    {t('message_state_button')}
-                  </div>
-                }
-              />
-            }
-          >
-            <a
-              className={buttonVariants({ size: 'lg' })}
-              href="https://github.com/ixartz/SaaS-Boilerplate"
-            >
-              {t('message_state_button')}
-            </a>
-          </Protect>
+          <FileUpload />
         }
       />
     </>
