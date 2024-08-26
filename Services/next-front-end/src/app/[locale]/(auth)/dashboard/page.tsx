@@ -1,5 +1,4 @@
 import { Protect } from '@clerk/nextjs';
-import { useTranslations } from 'next-intl';
 
 import { buttonVariants } from '@/components/ui/button';
 import { ProtectFallback } from '@/features/auth/ProtectFallback';
@@ -9,8 +8,6 @@ import { FileUpload } from '@/features/dashboard/CSVUpload'
 import { ORG_ROLE } from '@/types/Auth';
 
 const DashboardIndexPage = () => {
-  const t = useTranslations('DashboardIndex');
-
   return (
     <>
       <TitleBar

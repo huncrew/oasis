@@ -23,7 +23,7 @@ export class LambdaStack extends Stack {
 
     // apigw lambda
     this.apigwHandler = new NodejsFunction(this, 'ApigwHandler', {
-      entry: `${props.lambdaCodePath}/apigw-requests/handlers/stripe.ts`,
+      entry: `${props.lambdaCodePath}/apigw-requests/index.ts`,
       environment: {
         STRIPE_SECRET_KEY: config.STRIPE_SECRET_KEY,
       },
