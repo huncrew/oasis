@@ -9,8 +9,8 @@ export class DataStack extends Stack {
     super(scope, id, props);
 
     // Create DynamoDB table for Project Context
-    this.projectContextTable = new Table(this, 'FeatureFlowContextTable', {
-      tableName: 'FeatureFlowContextTable', // Specify your table name here
+    this.projectContextTable = new Table(this, 'ContextTable', {
+      tableName: 'ContextTable', // Specify your table name here
       partitionKey: {
         name: 'PK',
         type: AttributeType.STRING,

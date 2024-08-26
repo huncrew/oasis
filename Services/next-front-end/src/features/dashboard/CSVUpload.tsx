@@ -1,9 +1,14 @@
 "use client"; 
 import React, { useState } from 'react';
+import { useUser } from '@clerk/nextjs';
+
+import { v4 as uuidv4 } from 'uuid';
 
 const FileUpload = () => {
   const [file, setFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const { user } = useUser();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -12,18 +17,27 @@ const FileUpload = () => {
   };
 
   const handleUpload = async () => {
-    if (file) {
-      const formData = new FormData();
-      formData.append('file', file);
+    console.log('called in handleUpload');
+    console.log(user);
+    if (file && user) {
+      const newJobId = uuidv4();
+      setJobId(newJobId); // Save the generated Job ID in the state
 
       try {
-        const response = await fetch('/api/upload-csv', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_AWS_API_URL}}/upload-csv`, {
           method: 'POST',
-          body: formData,
+          body: await file.arrayBuffer(),  // Convert the file to binary data
+          headers: {
+            'X-Job-Id': jobId as string,
+            'X-User-Id': user.id,
+          },
         });
 
-        const data = await response.json();
-        setUploadStatus(`Upload successful: ${data.jobId}`);
+        if (!response.ok) {
+          throw new Error('Upload failed');
+        }
+
+        setUploadStatus(`Upload successful: ${newJobId}`);
       } catch (error) {
         setUploadStatus('Upload failed');
       }
