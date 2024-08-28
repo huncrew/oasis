@@ -23,7 +23,7 @@ export class ApiStack extends Stack {
       defaultCorsPreflightOptions: {
         allowOrigins: Cors.ALL_ORIGINS,
         allowMethods: Cors.ALL_METHODS,
-        allowHeaders: ['Content-Type'],
+        allowHeaders: ['Content-Type', 'X-Job-Id', 'X-User-Id'],
       },
     });
 
@@ -43,6 +43,14 @@ export class ApiStack extends Stack {
     const stepCreateResource = this.api.root.addResource('stripe-checkout');
     
     stepCreateResource.addMethod(
+      'POST',
+      new LambdaIntegration(authHandler),
+    );
+
+    // post csv
+    const postCsv = this.api.root.addResource('upload-csv');
+    
+    postCsv.addMethod(
       'POST',
       new LambdaIntegration(authHandler),
     );
