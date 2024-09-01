@@ -23,13 +23,16 @@ const FileUpload = () => {
       const newJobId = uuidv4();
       setJobId(newJobId); // Save the generated Job ID in the state
 
+      console.log(process.env.NEXT_PUBLIC_AWS_API_URL);
+
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_AWS_API_URL}}/upload-csv`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_AWS_API_URL}/upload-csv`, {
           method: 'POST',
-          body: await file.arrayBuffer(),  // Convert the file to binary data
+          body: file,
           headers: {
             'X-Job-Id': jobId as string,
             'X-User-Id': user.id,
+            'Content-Type': 'text/csv',  // Set the correct content type
           },
         });
 

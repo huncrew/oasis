@@ -26,6 +26,7 @@ export class LambdaStack extends Stack {
       entry: `${props.lambdaCodePath}/apigw-requests/index.ts`,
       environment: {
         STRIPE_SECRET_KEY: config.STRIPE_SECRET_KEY,
+        OPENAI_KEY: config.OPENAI_KEY
       },
     });
 
