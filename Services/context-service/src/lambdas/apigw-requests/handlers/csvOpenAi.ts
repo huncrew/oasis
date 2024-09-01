@@ -13,7 +13,10 @@ export const uploadCsvHandler: APIGatewayProxyHandler = async (event) => {
 
   console.log(jobId, userId)
 
-  const fileContent = Buffer.from(event.body || '', 'base64').toString('utf-8');
+
+  const fileContent = event.body
+
+  console.log(fileContent);
 
 
   // Parse the CSV content
@@ -24,6 +27,8 @@ export const uploadCsvHandler: APIGatewayProxyHandler = async (event) => {
 
   // Combine all feedback into a single prompt
   const feedbackTexts = records.map(record => record.feedback).join('\n\n');
+
+  console.log('feedback texts', feedbackTexts)
 
   // Send a single prompt to OpenAI for a combined analysis
   const response = await openai.chat.completions.create({

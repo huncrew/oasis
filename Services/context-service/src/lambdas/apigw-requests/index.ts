@@ -31,4 +31,4 @@ const routes: Route<APIGatewayProxyEvent | ALBEvent, APIGatewayProxyResult | ALB
 // Apply middleware and router
 export const handler = middy()
   .handler(httpRouterHandler(routes))
-  .use(jsonBodyParser());
+  // .use(jsonBodyParser());
