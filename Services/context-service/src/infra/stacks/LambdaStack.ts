@@ -9,7 +9,7 @@ import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 
 export interface LambdaStackProps extends StackProps {
   lambdaCodePath: string;
-  // projectContextTable: Table; 
+  projectContextTable: Table; 
   // myQueue: Queue; 
 }
 
@@ -28,6 +28,7 @@ export class LambdaStack extends Stack {
         STRIPE_SECRET_KEY: config.STRIPE_SECRET_KEY,
         OPENAI_KEY: config.OPENAI_KEY
       },
+      timeout: Duration.seconds(90), // Set timeout to 90 seconds
     });
 
     this.apigwHandler.addPermission('GenerateAIInvokePermission', {
@@ -42,6 +43,9 @@ export class LambdaStack extends Stack {
       exportName: 'ContextService-ApigwHandlerOutput',
     });
 
+    props.projectContextTable.grantReadWriteData(this.apigwHandler);
+
+
     // // GENERATE AI
     // this.generateAI = new NodejsFunction(this, 'GenerateAI', {
     //   entry: `${props.lambdaCodePath}/sqs-generate-ai-chatgpt/index.ts`,
@@ -52,7 +56,6 @@ export class LambdaStack extends Stack {
     //   },
     // });
 
-    // props.projectContextTable.grantReadWriteData(this.generateAI);
 
     // this.generateAI.addPermission('GenerateAIInvokePermission', {
     //   principal: new ServicePrincipal('apigateway.amazonaws.com'),

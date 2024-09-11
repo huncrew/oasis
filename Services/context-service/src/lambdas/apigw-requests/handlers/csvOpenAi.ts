@@ -8,8 +8,14 @@ const openai = new OpenAI({
 });
 
 export const uploadCsvHandler: APIGatewayProxyHandler = async (event) => {
-  const jobId = event.headers['X-Job-Id'];
-  const userId = event.headers['X-User-Id'];
+  console.log('Received event:', JSON.stringify(event, null, 2));
+
+
+  console.log('event headers')
+  console.log(event.headers)
+
+  const jobId = event.headers['x-job-id'];
+  const userId = event.headers['x-user-id'];
 
   console.log(jobId, userId)
 
@@ -17,18 +23,6 @@ export const uploadCsvHandler: APIGatewayProxyHandler = async (event) => {
   const fileContent = event.body
 
   console.log(fileContent);
-
-
-  // Parse the CSV content
-  const records = parse(fileContent, {
-    columns: true,
-    skip_empty_lines: true,
-  });
-
-  // Combine all feedback into a single prompt
-  const feedbackTexts = records.map(record => record.feedback).join('\n\n');
-
-  console.log('feedback texts', feedbackTexts)
 
   // Send a single prompt to OpenAI for a combined analysis
   const response = await openai.chat.completions.create({
@@ -40,7 +34,7 @@ export const uploadCsvHandler: APIGatewayProxyHandler = async (event) => {
       },
       {
         role: 'user',
-        content: `Here is a collection of customer feedback:\n\n${feedbackTexts}\n\nPlease analyze and summarize this feedback.`,
+        content: `Here is a collection of customer feedback:\n\n${fileContent}\n\nPlease analyze and summarize this feedback.`,
       },
     ],
   });

@@ -5,7 +5,7 @@ export default function CenteredLayout(props: { children: React.ReactNode }) {
   const { userId } = auth();
 
   if (userId) {
-    redirect('/pricing');
+    redirect('/dashboard');
   }
 
   return (
