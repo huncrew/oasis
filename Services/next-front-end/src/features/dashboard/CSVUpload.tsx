@@ -30,7 +30,7 @@ const FileUpload = () => {
           method: 'POST',
           body: file,
           headers: {
-            'X-Job-Id': jobId as string,
+            'X-Job-Id': newJobId as string,
             'X-User-Id': user.id,
             'Content-Type': 'text/csv',  // Set the correct content type
           },

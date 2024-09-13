@@ -50,5 +50,10 @@ export const uploadCsvHandler: APIGatewayProxyHandler = async (event) => {
   return {
     statusCode: 202,
     body: JSON.stringify({ message: 'Processing started.', jobId }),
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*", // or specific origin
+      "Access-Control-Allow-Headers": "Content-Type",      
+    },
   };
 };

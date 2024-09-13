@@ -55,6 +55,14 @@ export class ApiStack extends Stack {
       new LambdaIntegration(authHandler),
     );
 
+    // post csv
+    const jobs = this.api.root.addResource('jobs');
+
+    jobs.addMethod(
+      'GET',
+      new LambdaIntegration(authHandler),
+    );
+
     // // STEP STATUS CHECK
     // const stepStatusCheckResource =
     //   this.api.root.addResource('step-status-check');
