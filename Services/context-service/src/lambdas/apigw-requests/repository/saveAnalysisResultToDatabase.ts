@@ -5,8 +5,8 @@ export const saveAnalysisResultToDatabase = async ({ jobId, userId, result }) =>
     const params = {
       TableName: 'ContextTable',
       Item: {
-        PK: `JOB#${jobId}`,  // PK: Using jobId with a prefix to differentiate between other types of items if needed
-        SK: `USER#${userId}`, // SK: Using userId with a prefix for clarity and querying
+        PK: `USER#${userId}`, // SK: Using userId with a prefix for clarity and querying
+        SK: `JOB#${jobId}`,  // PK: Using jobId with a prefix to differentiate between other types of items if needed
         Result: result,
         CreatedAt: new Date().toISOString(),
       },

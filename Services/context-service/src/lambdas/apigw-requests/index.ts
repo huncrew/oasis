@@ -4,6 +4,7 @@ import httpRouterHandler, { Route } from '@middy/http-router';
 import jsonBodyParser from '@middy/http-json-body-parser';
 import { stripeHandler } from './handlers/stripe';
 import { uploadCsvHandler } from './handlers/csvOpenAi';
+import { getJobsHandler } from './handlers/getJobs';
 // import { uploadCsvHandler } from './handlers/uploadCsvHandler';
 // import { retrieveAnalysisHandler } from './handlers/retrieveAnalysisHandler';
 
@@ -21,11 +22,11 @@ const routes: Route<APIGatewayProxyEvent | ALBEvent, APIGatewayProxyResult | ALB
     path: '/upload-csv',
     handler: uploadCsvHandler,
   },
-  // {
-  //   method: 'GET',
-  //   path: '/retrieve-analysis',
-  //   handler: retrieveAnalysisHandler,
-  // },
+  {
+    method: 'GET',
+    path: '/jobs',
+    handler: getJobsHandler,
+  },
 ];
 
 // Apply middleware and router
