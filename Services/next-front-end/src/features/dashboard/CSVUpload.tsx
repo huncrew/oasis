@@ -43,7 +43,7 @@ const FileUpload = () => {
   };
 
   return (
-    <div className="bg-card p-5 rounded-md">
+    <div className="bg-card p-5 rounded-md flex flex-col items-center">
       <h2 className="text-xl font-semibold text-primary">Upload Your CSV Data</h2>
       <div className="mt-4">
         <input
