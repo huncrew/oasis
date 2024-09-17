@@ -5,6 +5,7 @@ import jsonBodyParser from '@middy/http-json-body-parser';
 import { stripeHandler } from './handlers/stripe';
 import { uploadCsvHandler } from './handlers/csvOpenAi';
 import { getJobsHandler } from './handlers/getJobs';
+import { getLatestJobHandler } from './handlers/getLatestJob';
 // import { uploadCsvHandler } from './handlers/uploadCsvHandler';
 // import { retrieveAnalysisHandler } from './handlers/retrieveAnalysisHandler';
 
@@ -26,6 +27,11 @@ const routes: Route<APIGatewayProxyEvent | ALBEvent, APIGatewayProxyResult | ALB
     method: 'GET',
     path: '/jobs',
     handler: getJobsHandler,
+  },
+  {
+    method: 'GET',
+    path: '/latest-job',
+    handler: getLatestJobHandler,
   },
 ];
 

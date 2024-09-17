@@ -3,50 +3,13 @@
 "use client"; 
 import React, { useState } from 'react';
 import { Protect } from '@clerk/nextjs';
-import { buttonVariants } from '@/components/ui/button';
 import { ProtectFallback } from '@/features/auth/ProtectFallback';
 import { MessageState } from '@/features/dashboard/MessageState';
 import { TitleBar } from '@/features/dashboard/TitleBar';
 import { FileUpload } from '@/features/dashboard/CSVUpload';
 import { useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-
-const DashboardIndexPage = () => {
-  const [activeTab, setActiveTab] = useState('Overview');
-
-  return (
-    <>
-      <TitleBar title="Dashboard" />
-      <div className="flex">
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-        <div className="w-full p-4">
-          {activeTab === 'Overview' && (
-            <MessageState
-              icon={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M0 0h24v24H0z" stroke="none" />
-                  <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3M12 12l8-4.5M12 12v9M12 12L4 7.5" />
-                </svg>
-              }
-              title="Your Dashboard"
-              description="Upload your CV data"
-              button={<FileUpload />}
-            />
-          )}
-          {activeTab === 'Jobs' && <JobsTab />}
-        </div>
-      </div>
-    </>
-  );
-};
-
-export default DashboardIndexPage;
+import OverviewDashboard from '@/features/dashboard/OverviewDashboard';
 
 const Sidebar = ({
   activeTab,
@@ -150,3 +113,88 @@ const JobsTab = () => {
   );
 };
 
+
+
+
+const DashboardIndexPage = () => {
+  const [activeTab, setActiveTab] = useState('Overview');
+  const [latestJob, setLatestJob] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const { user } = useUser();
+
+  useEffect(() => {
+    const fetchLatestJob = async () => {
+      if (activeTab === 'Overview' && user) {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_AWS_API_URL}/latest-job`, {
+            headers: {
+              'X-User-Id': user.id,
+            },
+          });
+
+          console.log(response)
+  
+          if (!response.ok) {
+
+            console.log(response)
+            throw new Error('Failed to fetch latest job');
+          }
+  
+          const data = await response.json();
+          setLatestJob(data);
+        } catch (err: any) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+  
+    fetchLatestJob();
+  }, [activeTab, user]);
+  
+  return (
+    <>
+      <TitleBar title="Dashboard" />
+      <div className="flex">
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <div className="w-full p-4">
+          {activeTab === 'Overview' && (
+            <>
+              {loading ? (
+                <p>Loading...</p>
+              ) : error ? (
+                <p>Error: {error}</p>
+              ) : latestJob ? (
+                <OverviewDashboard latestJob={latestJob} />
+              ) : (
+                <MessageState
+                  icon={
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M0 0h24v24H0z" stroke="none" />
+                      <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3M12 12l8-4.5M12 12v9M12 12L4 7.5" />
+                    </svg>
+                  }
+                  title="Your Dashboard"
+                  description="Upload your CSV data"
+                  button={<FileUpload />}
+                />
+              )}
+            </>
+          )}
+          {activeTab === 'Jobs' && <JobsTab />}
+        </div>
+      </div>
+    </>
+  ); 
+}
+
+export default DashboardIndexPage;
