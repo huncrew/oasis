@@ -2,13 +2,13 @@ import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 
 interface OverviewDashboardProps {
-  latestJob: any;
+  results: any[];
 }
 
-const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ latestJob }) => {
-  const { Results } = latestJob;
+const OverviewDashboard: React.FC<OverviewDashboardProps> = ({ results }) => {
+  const Results = results;
 
-  console.log('consling results', latestJob);
+  console.log('consling results', results);
 
   // Prepare data for visualizations
   const sentimentCounts = { Positive: 0, Neutral: 0, Negative: 0 } as any;

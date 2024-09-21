@@ -6,6 +6,7 @@ import { stripeHandler } from './handlers/stripe';
 import { uploadCsvHandler } from './handlers/csvOpenAi';
 import { getJobsHandler } from './handlers/getJobs';
 import { getLatestJobHandler } from './handlers/getLatestJob';
+import { getAggregatedResultsHandler } from './handlers/aggregateJobs';
 // import { uploadCsvHandler } from './handlers/uploadCsvHandler';
 // import { retrieveAnalysisHandler } from './handlers/retrieveAnalysisHandler';
 
@@ -33,6 +34,13 @@ const routes: Route<APIGatewayProxyEvent | ALBEvent, APIGatewayProxyResult | ALB
     path: '/latest-job',
     handler: getLatestJobHandler,
   },
+  {
+    method: 'GET',
+    path: '/aggregated-results',
+    handler: getAggregatedResultsHandler,
+  },
+
+  
 ];
 
 // Apply middleware and router
