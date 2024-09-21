@@ -71,6 +71,14 @@ export class ApiStack extends Stack {
       new LambdaIntegration(authHandler),
     );
 
+    // get latest job for analysis
+    const aggregatedResults = this.api.root.addResource('aggregated-results');
+
+    aggregatedResults.addMethod(
+      'GET',
+      new LambdaIntegration(authHandler),
+    );
+
     // // STEP STATUS CHECK
     // const stepStatusCheckResource =
     //   this.api.root.addResource('step-status-check');

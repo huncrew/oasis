@@ -6,10 +6,12 @@ import { Protect } from '@clerk/nextjs';
 import { ProtectFallback } from '@/features/auth/ProtectFallback';
 import { MessageState } from '@/features/dashboard/MessageState';
 import { TitleBar } from '@/features/dashboard/TitleBar';
-import { FileUpload } from '@/features/dashboard/CSVUpload';
+import FileUpload from '@/features/dashboard/CSVUpload';
 import { useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import OverviewDashboard from '@/features/dashboard/OverviewDashboard';
+import { useRouter } from 'next/navigation';
+
 
 const Sidebar = ({
   activeTab,
@@ -43,117 +45,215 @@ const Sidebar = ({
 );
 
 
-const JobsTab = () => {
-  const [jobs, setJobs] = useState([]);  // State to hold job data
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState<string | null>(null); // Error state
+interface Job {
+  jobId: string;
+  createdAt: string;
+  result: any[]; // Replace `any` with a specific type if possible
+  resultsCount: number;
+  // Remove 'status' as it's not present in the data
+}
+
+
+const JobsTab: React.FC = () => {
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   const { user } = useUser();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchJobs = async () => {
+      if (!user) {
+        setError('User not authenticated.');
+        setLoading(false);
+        return;
+      }
+
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_AWS_API_URL}/jobs`, {
           headers: {
-            'X-User-Id': user?.id ?? '',
+            'X-User-Id': user.id,
           },
         });
-
-        console.log(response); // Log the full response
 
         if (!response.ok) {
           throw new Error('Failed to fetch jobs');
         }
+
         const data = await response.json();
 
-        console.log('DATA JOBS /n', jobs)
-        setJobs(data); // Update jobs state with fetched data
+        console.log('CONSOLING THE DATA', data)
+
+        // Map the data to the Job interface
+        const mappedJobs: Job[] = data.map((job: any) => ({
+          jobId: job.jobId, // Directly use 'jobId' from data
+          createdAt: job.createdAt, // Use the correct case
+          result: job.result, // Directly use 'result' array
+          resultsCount: job.result ? job.result.length : 0, // Correctly reference 'result'
+        }));
+        
+
+        setJobs(mappedJobs);
       } catch (err: any) {
         setError(err.message);
       } finally {
-        setLoading(false); // Set loading to false after data fetch or error
+        setLoading(false);
       }
     };
 
-    fetchJobs(); // Fetch jobs when the component mounts
-  }, []); // Only run once on mount
+    fetchJobs();
+  }, [user]);
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
+  const handleViewDetails = (jobId: string) => {
+    router.push(`/dashboard/jobs/${jobId}`);
+  };
 
-  if (error) {
-    return <p>Error: {error}</p>;
-  }
+  // ... (rest of the component remains the same)
 
   return (
     <div className="bg-card p-5 rounded-md">
       <h2 className="text-xl font-semibold text-primary">Your Jobs</h2>
-      <ul className="mt-4 space-y-3">
-        {jobs.map((job: any) => (
-          <li key={job.jobId} className="border border-border rounded-md p-4 bg-muted hover:bg-muted-foreground">
-            <div className="flex justify-between">
-              <p className="text-lg font-medium text-foreground">Job ID: {job.jobId}</p>
-              <p className={`text-sm font-semibold ${job.status === 'Completed' ? 'text-green-600' : 'text-yellow-600'}`}>
-                {job.status}
-              </p>
-            </div>
-            <p className="text-sm text-muted-foreground mt-2">Created At: {new Date(job.createdAt).toLocaleString()}</p>
-            {/* Add result display here */}
-            {job.result && (
-              <div className="mt-3 bg-gray-100 p-3 rounded-md">
-                <h3 className="text-md font-semibold text-primary-foreground">Result:</h3>
-                <p className="text-sm text-foreground">{job.result}</p>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
+      <table className="min-w-full mt-4">
+  <thead>
+    <tr>
+      <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Job ID</th>
+      <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Created At</th>
+      <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Feedback Count</th>
+      <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">Actions</th>
+      {/* Remove or add additional headers if necessary */}
+    </tr>
+  </thead>
+  <tbody>
+    {jobs.map((job) => (
+      <tr key={job.jobId} className="border-t border-border">
+        <td className="px-4 py-2 text-sm text-foreground">{job.jobId}</td>
+        <td className="px-4 py-2 text-sm text-foreground">
+          {new Date(job.createdAt).toLocaleString()}
+        </td>
+        <td className="px-4 py-2 text-sm text-foreground">{job.resultsCount}</td>
+        <td className="px-4 py-2 text-sm text-foreground">
+          <button
+            onClick={() => handleViewDetails(job.jobId)}
+            className="text-primary hover:underline"
+          >
+            View Details
+          </button>
+        </td>
+        {/* Remove 'status' and 'result' cells */}
+      </tr>
+    ))}
+  </tbody>
+</table>
+
     </div>
   );
 };
 
 
+interface TimeFrameSelectorProps {
+  timeFrame: string;
+  setTimeFrame: React.Dispatch<React.SetStateAction<string>>;
+}
 
+export const TimeFrameSelector: React.FC<TimeFrameSelectorProps> = ({ timeFrame, setTimeFrame }) => (
+  <div className="flex space-x-4 mb-4">
+    <button
+      className={`px-4 py-2 rounded ${
+        timeFrame === '7' ? 'bg-primary text-white' : 'bg-muted text-foreground'
+      }`}
+      onClick={() => setTimeFrame('7')}
+    >
+      Last 7 Days
+    </button>
+    <button
+      className={`px-4 py-2 rounded ${
+        timeFrame === '30' ? 'bg-primary text-white' : 'bg-muted text-foreground'
+      }`}
+      onClick={() => setTimeFrame('30')}
+    >
+      Last 30 Days
+    </button>
+    <button
+      className={`px-4 py-2 rounded ${
+        timeFrame === 'all' ? 'bg-primary text-white' : 'bg-muted text-foreground'
+      }`}
+      onClick={() => setTimeFrame('all')}
+    >
+      All Time
+    </button>
+  </div>
+);
+
+
+
+interface AnalysisResult {
+  feedbackText: string;
+  sentiment: string;
+  themes: string[];
+  recommendations?: string[];
+}
 
 const DashboardIndexPage = () => {
   const [activeTab, setActiveTab] = useState('Overview');
   const [latestJob, setLatestJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [aggregatedResults, setAggregatedResults] = useState<AnalysisResult[] | null>(null);
+  const [loadingAggregated, setLoadingAggregated] = useState(true);
+  const [aggregationError, setAggregationError] = useState<string | null>(null);
+  const [timeFrame, setTimeFrame] = useState('30'); // Default to last 30 days
+
 
   const { user } = useUser();
 
   useEffect(() => {
-    const fetchLatestJob = async () => {
+    const fetchAggregatedResults = async () => {
       if (activeTab === 'Overview' && user) {
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_AWS_API_URL}/latest-job`, {
-            headers: {
-              'X-User-Id': user.id,
-            },
-          });
-
-          console.log(response)
+          setLoadingAggregated(true);
+  
+          // Calculate date range
+          let startDate = null;
+          const endDate = new Date().toISOString();
+          if (timeFrame !== 'all') {
+            const days = parseInt(timeFrame, 10);
+            const date = new Date();
+            date.setDate(date.getDate() - days);
+            startDate = date.toISOString();
+          }
+  
+          // Build query parameters
+          const queryParams = new URLSearchParams();
+          if (startDate) queryParams.append('startDate', startDate);
+          queryParams.append('endDate', endDate);
+  
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_AWS_API_URL}/aggregated-results?${queryParams.toString()}`,
+            {
+              headers: {
+                'X-User-Id': user.id,
+              },
+            }
+          );
   
           if (!response.ok) {
-
-            console.log(response)
-            throw new Error('Failed to fetch latest job');
+            throw new Error('Failed to fetch aggregated results');
           }
   
           const data = await response.json();
-          setLatestJob(data);
+          setAggregatedResults(data.Results);
         } catch (err: any) {
-          setError(err.message);
+          setAggregationError(err.message);
         } finally {
-          setLoading(false);
+          setLoadingAggregated(false);
         }
       }
     };
   
-    fetchLatestJob();
-  }, [activeTab, user]);
+    fetchAggregatedResults();
+  }, [activeTab, user, timeFrame]);
+  
   
   return (
     <>
@@ -161,15 +261,25 @@ const DashboardIndexPage = () => {
       <div className="flex">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         <div className="w-full p-4">
-          {activeTab === 'Overview' && (
-            <>
-              {loading ? (
-                <p>Loading...</p>
-              ) : error ? (
-                <p>Error: {error}</p>
-              ) : latestJob ? (
-                <OverviewDashboard latestJob={latestJob} />
-              ) : (
+        {activeTab === 'Overview' && (
+    <>
+              {/* Flex container for TimeFrameSelector and FileUpload */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
+                {/* Left Side: TimeFrameSelector */}
+                <TimeFrameSelector timeFrame={timeFrame} setTimeFrame={setTimeFrame} />
+                
+                {/* Right Side: FileUpload */}
+                <FileUpload />
+              </div>
+
+              {/* Aggregated Data Display */}
+        {loadingAggregated ? (
+          <p>Loading aggregated data...</p>
+        ) : aggregationError ? (
+          <p>Error: {aggregationError}</p>
+        ) : aggregatedResults && aggregatedResults.length > 0 ? (
+          <OverviewDashboard results={aggregatedResults} />
+        ) : (
                 <MessageState
                   icon={
                     <svg

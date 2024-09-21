@@ -30,7 +30,7 @@ export const getJobsHandler: APIGatewayProxyHandler = async (event) => {
 
     const jobs = data.Items?.map((item) => ({
       jobId: item.SK.replace('JOB#', ''),
-      result: item.Result,
+      result: item.Results,
       createdAt: item.CreatedAt,
     })) || [];
 
