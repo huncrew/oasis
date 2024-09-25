@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { LogoCloud } from '@/features/landing/LogoCloud';
 import { Section } from '@/features/landing/Section';
 
-const Sponsors = (namespace: any) => (
+const Sponsors = () => (
   <Section>
     <LogoCloud text="Trusted  by">
     <a href="https://glossier.com" target="_blank" rel="noopener noreferrer">

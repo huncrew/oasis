@@ -10,11 +10,9 @@ import { PLAN_ID } from '@/utils/AppConfig';
 import { Navbar } from '@/templates/Navbar';
 import CheckoutForm from '@/components/CheckoutForm'; // Import the checkout form
 
-type PricingProps = {
-  namespace: string;
-};
 
-const Pricing: React.FC<PricingProps> = ({ namespace = 'CustomerFeedback' }) => {
+const Pricing: React.FC = () => {
+  const namespace = 'CustomerFeedback'; // Define internally
   const t = useTranslations(namespace);
   const [showCheckout, setShowCheckout] = useState(false);
   const [selectedPriceId, setSelectedPriceId] = useState<PriceId | null>(null);

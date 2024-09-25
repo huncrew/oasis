@@ -7,6 +7,7 @@ import { uploadCsvHandler } from './handlers/csvOpenAi';
 import { getJobsHandler } from './handlers/getJobs';
 import { getLatestJobHandler } from './handlers/getLatestJob';
 import { getAggregatedResultsHandler } from './handlers/aggregateJobs';
+import { intercomCallbackHandler } from './handlers/intercomCallbackHandler';
 // import { uploadCsvHandler } from './handlers/uploadCsvHandler';
 // import { retrieveAnalysisHandler } from './handlers/retrieveAnalysisHandler';
 
@@ -37,10 +38,8 @@ const routes: Route<APIGatewayProxyEvent | ALBEvent, APIGatewayProxyResult | ALB
   {
     method: 'GET',
     path: '/aggregated-results',
-    handler: getAggregatedResultsHandler,
+    handler: intercomCallbackHandler,
   },
-
-  
 ];
 
 // Apply middleware and router

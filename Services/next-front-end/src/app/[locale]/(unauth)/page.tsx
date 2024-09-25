@@ -26,7 +26,7 @@ export default function IndexPage() {
     <>
       <Navbar namespace="CustomerFeedback"/>
       <Hero namespace="CustomerFeedback" />
-      <Sponsors namespace="CustomerFeedback" />
+      <Sponsors />
       <Features namespace="CustomerFeedback" />
       <Pricing namespace="CustomerFeedback" />
       <FAQ namespace="CustomerFeedback" />

@@ -2,8 +2,8 @@
 
 "use client"; 
 import React, { useState } from 'react';
-import { Protect } from '@clerk/nextjs';
-import { ProtectFallback } from '@/features/auth/ProtectFallback';
+// import { Protect } from '@clerk/nextjs';
+// import { ProtectFallback } from '@/features/auth/ProtectFallback';
 import { MessageState } from '@/features/dashboard/MessageState';
 import { TitleBar } from '@/features/dashboard/TitleBar';
 import FileUpload from '@/features/dashboard/CSVUpload';
@@ -11,38 +11,45 @@ import { useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import OverviewDashboard from '@/features/dashboard/OverviewDashboard';
 import { useRouter } from 'next/navigation';
+import IntegrationsTab from '@/features/dashboard/IntegrationTab';
 
 
-const Sidebar = ({
+// src/features/dashboard/Sidebar.tsx
+
+const Sidebar: React.FC<{ activeTab: string; setActiveTab: (tab: string) => void }> = ({
   activeTab,
   setActiveTab,
-}: {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
 }) => (
-  <div className="w-64 bg-card p-5 rounded-md">
-    <div
-      className={`cursor-pointer p-3 text-lg font-semibold rounded-md ${
-        activeTab === 'Overview'
-          ? 'bg-primary text-primary-foreground'
-          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-      }`}
-      onClick={() => setActiveTab('Overview')}
-    >
-      Overview
-    </div>
-    <div
-      className={`cursor-pointer p-3 text-lg font-semibold rounded-md mt-3 ${
-        activeTab === 'Jobs'
-          ? 'bg-primary text-primary-foreground'
-          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-      }`}
-      onClick={() => setActiveTab('Jobs')}
-    >
-      Jobs
-    </div>
+  <div className="w-64 bg-card p-4">
+    <nav className="space-y-2">
+      <button
+        onClick={() => setActiveTab('Overview')}
+        className={`w-full text-left px-4 py-2 rounded ${
+          activeTab === 'Overview' ? 'bg-primary text-white' : 'text-foreground'
+        }`}
+      >
+        Overview
+      </button>
+      <button
+        onClick={() => setActiveTab('Jobs')}
+        className={`w-full text-left px-4 py-2 rounded ${
+          activeTab === 'Jobs' ? 'bg-primary text-white' : 'text-foreground'
+        }`}
+      >
+        Jobs
+      </button>
+      <button
+        onClick={() => setActiveTab('Integrations')}
+        className={`w-full text-left px-4 py-2 rounded ${
+          activeTab === 'Integrations' ? 'bg-primary text-white' : 'text-foreground'
+        }`}
+      >
+        Integrations
+      </button>
+    </nav>
   </div>
 );
+
 
 
 interface Job {
@@ -61,6 +68,9 @@ const JobsTab: React.FC = () => {
 
   const { user } = useUser();
   const router = useRouter();
+
+  console.log(loading)
+  console.log(error)
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -156,7 +166,7 @@ interface TimeFrameSelectorProps {
   setTimeFrame: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const TimeFrameSelector: React.FC<TimeFrameSelectorProps> = ({ timeFrame, setTimeFrame }) => (
+const TimeFrameSelector: React.FC<TimeFrameSelectorProps> = ({ timeFrame, setTimeFrame }) => (
   <div className="flex space-x-4 mb-4">
     <button
       className={`px-4 py-2 rounded ${
@@ -196,9 +206,9 @@ interface AnalysisResult {
 
 const DashboardIndexPage = () => {
   const [activeTab, setActiveTab] = useState('Overview');
-  const [latestJob, setLatestJob] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // const [latestJob, setLatestJob] = useState(null);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState<string | null>(null);
   const [aggregatedResults, setAggregatedResults] = useState<AnalysisResult[] | null>(null);
   const [loadingAggregated, setLoadingAggregated] = useState(true);
   const [aggregationError, setAggregationError] = useState<string | null>(null);
@@ -301,6 +311,7 @@ const DashboardIndexPage = () => {
             </>
           )}
           {activeTab === 'Jobs' && <JobsTab />}
+          {activeTab === 'Integrations' && <IntegrationsTab />}
         </div>
       </div>
     </>

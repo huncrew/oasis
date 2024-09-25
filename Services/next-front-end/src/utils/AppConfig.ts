@@ -1,8 +1,5 @@
-import type { LocalePrefix } from 'node_modules/next-intl/dist/types/src/shared/types';
 
 import { BILLING_INTERVAL, type PricingPlan } from '@/types/Subscription';
-
-const localePrefix: LocalePrefix = 'as-needed';
 
 // FIXME: Update this configuration file based on your project information
 export const AppConfig = {
@@ -15,7 +12,7 @@ export const AppConfig = {
     { id: 'fr', name: 'Français' },
   ],
   defaultLocale: 'en',
-  localePrefix,
+  localePrefix: undefined
 };
 
 export const AllLocales = AppConfig.locales.map((locale) => locale.id);
