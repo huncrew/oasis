@@ -1,5 +1,5 @@
 {
-  "name": "football-aws-be",
+  "name": "oasify",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -14,9 +14,8 @@
   "author": "",
   "license": "ISC",
   "workspaces": [
-    "services/auth-service",
     "services/next-front-end",
-    "services/listing-service",
+    "services/context-service",
     "infra/api-gateway"
   ],
   "devDependencies": {
@@ -34,12 +33,17 @@
     "typescript": "^5.4.2"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.540.0",
-    "@aws-sdk/lib-dynamodb": "^3.540.0",
-    "@middy/core": "^4.6.0",
-    "@types/aws-lambda": "^8.10.136",
-    "aws-sdk": "^2.1617.0",
-    "openai": "^4.31.0",
-    "zod": "^3.22.4"
+    "@aws-sdk/client-dynamodb": "^3.637.0",
+    "@aws-sdk/lib-dynamodb": "^3.637.0",
+    "@middy/core": "^5.4.6",
+    "@middy/http-json-body-parser": "^5.4.6",
+    "@middy/http-router": "^5.4.6",
+    "@stripe/react-stripe-js": "^2.7.3",
+    "@stripe/stripe-js": "^4.1.0",
+    "@types/aws-lambda": "^8.10.140",
+    "aws-sdk": "^2.1651.0",
+    "middy": "^0.36.0",
+    "recharts": "^2.12.7",
+    "stripe": "^16.2.0"
   }
 }

@@ -24,14 +24,14 @@ export async function generateMetadata(props: { params: { locale: string } }) {
 export default function IndexPage() {
   return (
     <>
-      <Navbar />
-      <Hero />
-      <Sponsors />
-      <Features />
-      <Pricing />
-      <FAQ />
-      <CTA />
-      <Footer />
+      <Navbar namespace="CustomerFeedback"/>
+      <Hero namespace="CustomerFeedback" />
+      <Sponsors namespace="CustomerFeedback" />
+      <Features namespace="CustomerFeedback" />
+      <Pricing namespace="CustomerFeedback" />
+      <FAQ namespace="CustomerFeedback" />
+      <CTA namespace="CustomerFeedback" />
+      <Footer namespace="CustomerFeedback" />
     </>
   );
 }

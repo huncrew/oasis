@@ -10,125 +10,69 @@ import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 export interface LambdaStackProps extends StackProps {
   lambdaCodePath: string;
   projectContextTable: Table; 
-  myQueue: Queue; 
+  // myQueue: Queue; 
 }
 
 export class LambdaStack extends Stack {
-  public readonly contextHandler: NodejsFunction;
-  public readonly stepCreate: NodejsFunction;
-  public readonly stepStatusCheck: NodejsFunction;
-  public readonly generateAI: NodejsFunction;
+  public readonly apigwHandler: NodejsFunction;
+
 
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id, props);
 
-    const queueUrl = props.myQueue.queueUrl;
 
-    // PROJECT CONTEXT LAMBDA
-    this.contextHandler = new NodejsFunction(this, 'ContextHandler', {
-      entry: `${props.lambdaCodePath}/capture-project-context/index.ts`,
+    // apigw lambda
+    this.apigwHandler = new NodejsFunction(this, 'ApigwHandler', {
+      entry: `${props.lambdaCodePath}/apigw-requests/index.ts`,
       environment: {
-        PROJECT_CONTEXT_TABLE_NAME: props.projectContextTable.tableName,
+        STRIPE_SECRET_KEY: config.STRIPE_SECRET_KEY,
+        OPENAI_KEY: config.OPENAI_KEY
       },
+      timeout: Duration.seconds(90), // Set timeout to 90 seconds
     });
 
-    props.projectContextTable.grantReadWriteData(this.contextHandler);
-
-    this.contextHandler.addPermission('ContextHandlerInvokePermission', {
+    this.apigwHandler.addPermission('GenerateAIInvokePermission', {
       principal: new ServicePrincipal('apigateway.amazonaws.com'),
       action: 'lambda:InvokeFunction',
       sourceArn: `arn:aws:execute-api:${this.region}:${this.account}:*/*/*/*`,
     });
 
     // Output the lambda function ARN
-    new CfnOutput(this, 'ContextHandlerArn', {
-      value: this.contextHandler.functionArn,
-      exportName: 'ContextService-ContextHandlerArn',
+    new CfnOutput(this, 'ApigwHandlerOutput', {
+      value: this.apigwHandler.functionArn,
+      exportName: 'ContextService-ApigwHandlerOutput',
     });
 
-    // INITIATE STEP TASK LAMBDA FOR TASK ID
-    this.stepCreate = new NodejsFunction(this, 'CreateStep', {
-      entry: `${props.lambdaCodePath}/step-create/index.ts`,
-      timeout: Duration.seconds(600),
-      environment: {
-        PROJECT_CONTEXT_TABLE_NAME: props.projectContextTable.tableName,
-        SQS_QUEUE_URL: queueUrl,
-      },
-    });
+    props.projectContextTable.grantReadWriteData(this.apigwHandler);
 
-    props.projectContextTable.grantReadWriteData(this.stepCreate);
 
-    this.stepCreate.addPermission('StepCreateInvokePermission', {
-      principal: new ServicePrincipal('apigateway.amazonaws.com'),
-      action: 'lambda:InvokeFunction',
-      sourceArn: `arn:aws:execute-api:${this.region}:${this.account}:*/*/*/*`,
-    });
+    // // GENERATE AI
+    // this.generateAI = new NodejsFunction(this, 'GenerateAI', {
+    //   entry: `${props.lambdaCodePath}/sqs-generate-ai-chatgpt/index.ts`,
+    //   timeout: Duration.seconds(600),
+    //   environment: {
+    //     PROJECT_CONTEXT_TABLE_NAME: props.projectContextTable.tableName,
+    //     OPENAI_KEY: config.OPENAI_KEY,
+    //   },
+    // });
 
-    // Grant permissions to send messages to the SQS queue
-    this.stepCreate.addToRolePolicy(
-      new PolicyStatement({
-        actions: ['sqs:SendMessage'],
-        resources: [props.myQueue.queueArn],
-      }),
-    );
 
-    // Output the lambda function ARN
-    new CfnOutput(this, 'StepCreateHandler', {
-      value: this.stepCreate.functionArn,
-      exportName: 'ContextService-StepCreateArn',
-    });
+    // this.generateAI.addPermission('GenerateAIInvokePermission', {
+    //   principal: new ServicePrincipal('apigateway.amazonaws.com'),
+    //   action: 'lambda:InvokeFunction',
+    //   sourceArn: `arn:aws:execute-api:${this.region}:${this.account}:*/*/*/*`,
+    // });
 
-    // STEP TASK STATUS CHECK
-    this.stepStatusCheck = new NodejsFunction(this, 'StepStatusCheck', {
-      entry: `${props.lambdaCodePath}/step-task-status-check/index.ts`,
-      timeout: Duration.seconds(600),
-      environment: {
-        PROJECT_CONTEXT_TABLE_NAME: props.projectContextTable.tableName,
-      },
-    });
+    // // Grant permissions to consume messages from the SQS queue
+    // props.myQueue.grantConsumeMessages(this.generateAI);
 
-    props.projectContextTable.grantReadWriteData(this.stepStatusCheck);
+    // // Add SQS event source to the generateAI lambda
+    // this.generateAI.addEventSource(new SqsEventSource(props.myQueue));
 
-    this.stepStatusCheck.addPermission('StepStatusInvokePermission', {
-      principal: new ServicePrincipal('apigateway.amazonaws.com'),
-      action: 'lambda:InvokeFunction',
-      sourceArn: `arn:aws:execute-api:${this.region}:${this.account}:*/*/*/*`,
-    });
-
-    // Output the lambda function ARN
-    new CfnOutput(this, 'StepStatusHandler', {
-      value: this.stepStatusCheck.functionArn,
-      exportName: 'ContextService-StepStatusHandlerArn',
-    });
-
-    // GENERATE AI
-    this.generateAI = new NodejsFunction(this, 'GenerateAI', {
-      entry: `${props.lambdaCodePath}/sqs-generate-ai-chatgpt/index.ts`,
-      timeout: Duration.seconds(600),
-      environment: {
-        PROJECT_CONTEXT_TABLE_NAME: props.projectContextTable.tableName,
-        OPENAI_KEY: config.OPENAI_KEY,
-      },
-    });
-
-    props.projectContextTable.grantReadWriteData(this.generateAI);
-
-    this.generateAI.addPermission('GenerateAIInvokePermission', {
-      principal: new ServicePrincipal('apigateway.amazonaws.com'),
-      action: 'lambda:InvokeFunction',
-      sourceArn: `arn:aws:execute-api:${this.region}:${this.account}:*/*/*/*`,
-    });
-
-    // Grant permissions to consume messages from the SQS queue
-    props.myQueue.grantConsumeMessages(this.generateAI);
-
-    // Add SQS event source to the generateAI lambda
-    this.generateAI.addEventSource(new SqsEventSource(props.myQueue));
-
-    // Output the lambda function ARN
-    new CfnOutput(this, 'GenerateAIHandler', {
-      value: this.generateAI.functionArn,
-      exportName: 'ContextService-GenerateAIHandlerArn',
-    });
+    // // Output the lambda function ARN
+    // new CfnOutput(this, 'GenerateAIHandler', {
+    //   value: this.generateAI.functionArn,
+    //   exportName: 'ContextService-GenerateAIHandlerArn',
+    // });
   }
 }

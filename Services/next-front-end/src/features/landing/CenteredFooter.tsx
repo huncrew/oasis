@@ -26,7 +26,7 @@ const CenteredFooter = (props: {
       <div className="mt-6 flex w-full items-center justify-between gap-y-2 border-t pt-3 text-sm text-muted-foreground max-md:flex-col">
         <div>
           © Copyright {new Date().getFullYear()} {props.name}.{' '}
-          {t.rich('designed_by', {
+          {t.rich('Footer.designed_by', {
             author: () => (
               <Link
                 className="text-blue-500 hover:text-blue-600"
