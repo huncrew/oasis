@@ -1,5 +1,8 @@
+type LocalePrefix = 'always' | 'as-needed' | 'never';
 
 import { BILLING_INTERVAL, type PricingPlan } from '@/types/Subscription';
+
+const localePrefix: LocalePrefix = 'as-needed';
 
 // FIXME: Update this configuration file based on your project information
 export const AppConfig = {
@@ -11,10 +14,9 @@ export const AppConfig = {
     },
     { id: 'fr', name: 'Français' },
   ],
-  defaultLocale: '',
-  localePrefix: undefined
+  defaultLocale: 'en',
+  localePrefix,
 };
-
 export const AllLocales = AppConfig.locales.map((locale) => locale.id);
 
 export const PLAN_ID = {
