@@ -22,6 +22,9 @@ export async function generateMetadata(props: { params: { locale: string } }) {
 }
 
 export default function IndexPage() {
+
+  console.log('hello',process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
+
   return (
     <>
       <Navbar namespace="CustomerFeedback"/>

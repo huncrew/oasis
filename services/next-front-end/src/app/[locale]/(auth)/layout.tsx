@@ -21,6 +21,9 @@ export default function AuthLayout(props: {
     dashboardUrl = `/${props.params.locale}${dashboardUrl}`;
   }
 
+
+  console.log(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
+
   return (
     <ClerkProvider
       publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}

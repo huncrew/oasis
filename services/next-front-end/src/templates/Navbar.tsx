@@ -15,6 +15,7 @@ type NavbarProps = {
 
 const Navbar = ({ namespace }: NavbarProps) => {
   const t = useTranslations(namespace);
+  console.log('hello',process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
 
   return (
     <Section className="px-3 py-6">
