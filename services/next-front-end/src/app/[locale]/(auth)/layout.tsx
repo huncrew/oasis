@@ -24,7 +24,9 @@ export default function AuthLayout(props: {
 
   console.log(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
 
-  console.log('secret key', process.env.CLERK_SECRET_KEY)
+  console.log('whats the secret key auth layout',process.env.CLERK_SECRET_KEY)
+  console.log('clerk encryption key', process.env.CLERK_ENCRYPTION_KEY)
+  console.log('database url', process.env.DATABASE_URL)
 
   return (
     <ClerkProvider
