@@ -1,6 +1,8 @@
 import { enUS, frFR } from '@clerk/localizations';
 import { ClerkProvider } from '@clerk/nextjs';
 import { AppConfig } from '@/utils/AppConfig';
+import { Env } from '@/libs/Env'; // Adjust the path based on your project structure
+
 
 export default function AuthLayout(props: {
   children: React.ReactNode;
@@ -24,9 +26,9 @@ export default function AuthLayout(props: {
 
   console.log(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
 
-  console.log('whats the secret key auth layout',process.env.CLERK_SECRET_KEY)
-  console.log('clerk encryption key', process.env.CLERK_ENCRYPTION_KEY)
-  console.log('database url', process.env.DATABASE_URL)
+  console.log('whats the secret key root layout', Env.CLERK_SECRET_KEY);
+  console.log('clerk encryption key', Env.CLERK_ENCRYPTION_KEY);
+  console.log('database url', Env.DATABASE_URL);
 
   return (
     <ClerkProvider
