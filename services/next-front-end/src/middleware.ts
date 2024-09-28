@@ -35,7 +35,7 @@ export default function middleware(
         const authObj = auth();
 
 
-        console.log(process.env.CLERK_SECRET_KEY)
+        console.log('whats the secret key',process.env.CLERK_SECRET_KEY)
         console.log('authObj:', authObj);
 
         if (isProtectedRoute(req)) {
