@@ -66,9 +66,6 @@ export default function middleware(
 
         return intlMiddleware(req);
       },
-      {
-        secretKey: process.env.CLERK_SECRET_KEY,
-      }
     )(request, event);
   }
 
