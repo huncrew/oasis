@@ -39,6 +39,8 @@ export default function RootLayout(props: {
 }) {
 
   console.log('whats the secret key root layout',process.env.CLERK_SECRET_KEY)
+  console.log('clerk encryption key', process.env.CLERK_ENCRYPTION_KEY)
+  console.log('database url', process.env.DATABASE_URL)
 
   // Validate that the incoming `locale` parameter is valid
   if (!AllLocales.includes(props.params.locale)) notFound();
