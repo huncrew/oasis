@@ -1,31 +1,77 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
+import {
+  type NextFetchEvent,
+  type NextRequest,
+  NextResponse,
+} from 'next/server';
+import createMiddleware from 'next-intl/middleware';
+
+import { AllLocales, AppConfig } from './utils/AppConfig';
+
+const intlMiddleware = createMiddleware({
+  locales: AllLocales,
+  localePrefix: AppConfig.localePrefix,
+  defaultLocale: AppConfig.defaultLocale,
+});
 
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
+  '/:locale/dashboard(.*)',
   '/onboarding(.*)',
+  '/:locale/onboarding(.*)',
 ]);
 
-export default clerkMiddleware(
-  (auth, req) => {
-    const authObj = auth();
+export default function middleware(
+  request: NextRequest,
+  event: NextFetchEvent,
+) {
+  if (
+    request.nextUrl.pathname.includes('/sign-in') ||
+    request.nextUrl.pathname.includes('/sign-up') ||
+    isProtectedRoute(request)
+  ) {
+    return clerkMiddleware(
+      (auth, req) => {
+        const authObj = auth();
 
-    console.log('authObj:', authObj);
+        console.log('authObj:', authObj);
 
-    if (isProtectedRoute(req)) {
-      const signInUrl = new URL('/sign-in', req.url);
+        if (isProtectedRoute(req)) {
+          const locale =
+            req.nextUrl.pathname.match(/(\/.*)\/dashboard/)?.at(1) ?? '';
 
-      authObj.protect({
-        unauthenticatedUrl: signInUrl.toString(),
-      });
-    }
+          const signInUrl = new URL(`${locale}/sign-in`, req.url);
 
-    return NextResponse.next();
-  },
-  {
-    secretKey: process.env.CLERK_SECRET_KEY,
+          authObj.protect({
+            // `unauthenticatedUrl` is needed to avoid error: "Unable to find `next-intl` locale because the middleware didn't run on this request"
+            unauthenticatedUrl: signInUrl.toString(),
+          });
+        }
+
+        if (
+          authObj.userId &&
+          !authObj.orgId &&
+          req.nextUrl.pathname.includes('/dashboard') &&
+          !req.nextUrl.pathname.endsWith('/organization-selection')
+        ) {
+          const orgSelection = new URL(
+            '/onboarding/organization-selection',
+            req.url,
+          );
+
+          return NextResponse.redirect(orgSelection);
+        }
+
+        return intlMiddleware(req);
+      },
+      {
+        secretKey: process.env.CLERK_SECRET_KEY,
+      }
+    )(request, event);
   }
-);
+
+  return intlMiddleware(request);
+}
 
 export const config = {
   matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
