@@ -33,6 +33,9 @@ export default function middleware(
     return clerkMiddleware((auth, req) => {
       const authObj = auth();
 
+      console.log('authObj:', authObj);
+
+
       if (isProtectedRoute(req)) {
         const locale =
           req.nextUrl.pathname.match(/(\/.*)\/dashboard/)?.at(1) ?? '';

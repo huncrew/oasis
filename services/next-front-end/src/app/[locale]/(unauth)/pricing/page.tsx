@@ -12,6 +12,8 @@ import CheckoutForm from '@/components/CheckoutForm'; // Import the checkout for
 
 
 const Pricing: React.FC = () => {
+  console.log('Publishable Key:', process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+
   const namespace = 'CustomerFeedback'; // Define internally
   const t = useTranslations(namespace);
   const [showCheckout, setShowCheckout] = useState(false);
