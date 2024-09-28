@@ -32,9 +32,14 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout(props: {
+
+  
   children: React.ReactNode;
   params: { locale: string };
 }) {
+
+  console.log('whats the secret key root layout',process.env.CLERK_SECRET_KEY)
+
   // Validate that the incoming `locale` parameter is valid
   if (!AllLocales.includes(props.params.locale)) notFound();
 
