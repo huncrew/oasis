@@ -38,7 +38,7 @@ const routes: Route<APIGatewayProxyEvent | ALBEvent, APIGatewayProxyResult | ALB
   {
     method: 'GET',
     path: '/aggregated-results',
-    handler: intercomCallbackHandler,
+    handler: getAggregatedResultsHandler,
   },
 ];
 

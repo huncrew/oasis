@@ -8,6 +8,8 @@ export const getAggregatedResultsHandler: APIGatewayProxyHandler = async (event)
   const startDate = queryParams.startDate;
   const endDate = queryParams.endDate;
 
+  console.log('calling in aggregated results')
+
   try {
     // Construct the DynamoDB query
     const params: any = {
@@ -37,6 +39,9 @@ export const getAggregatedResultsHandler: APIGatewayProxyHandler = async (event)
 
     // Fetch all jobs for the user
     const result = await dynamoDb.send(new QueryCommand(params));
+
+    console.log('calling in aggregated DB ', result);
+
 
     const allResults = [];
 
