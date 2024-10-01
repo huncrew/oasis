@@ -1,68 +1,58 @@
 import '@/styles/global.css';
-
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider, useMessages } from 'next-intl';
-
-import { AllLocales } from '@/utils/AppConfig';
+import { ClerkProvider } from '@clerk/nextjs';
+import { enUS, frFR } from '@clerk/localizations';
+import { AllLocales, AppConfig } from '@/utils/AppConfig';
 
 export const metadata: Metadata = {
   icons: [
-    {
-      rel: 'apple-touch-icon',
-      url: '/apple-touch-icon.png',
-    },
-    {
-      rel: 'icon',
-      type: 'image/png',
-      sizes: '32x32',
-      url: '/favicon-32x32.png',
-    },
-    {
-      rel: 'icon',
-      type: 'image/png',
-      sizes: '16x16',
-      url: '/favicon-16x16.png',
-    },
-    {
-      rel: 'icon',
-      url: '/favicon.ico',
-    },
+    { rel: 'apple-touch-icon', url: '/apple-touch-icon.png' },
+    { rel: 'icon', type: 'image/png', sizes: '32x32', url: '/favicon-32x32.png' },
+    { rel: 'icon', type: 'image/png', sizes: '16x16', url: '/favicon-16x16.png' },
+    { rel: 'icon', url: '/favicon.ico' },
   ],
 };
 
-export default function RootLayout(props: {
+export default function RootLayout(props: { children: React.ReactNode; params: { locale: string } }) {
+  const { children, params } = props;
+  const { locale } = params;
 
-  
-  children: React.ReactNode;
-  params: { locale: string };
-}) {
+  // Validate the incoming `locale` parameter
+  if (!AllLocales.includes(locale)) notFound();
 
-  console.log('whats the secret key root layout',process.env.CLERK_SECRET_KEY)
-  console.log('clerk encryption key', process.env.CLERK_ENCRYPTION_KEY)
-  console.log('database url', process.env.DATABASE_URL)
+  // Determine Clerk localization and URLs based on locale
+  const clerkLocale = locale === 'fr' ? frFR : enUS;
+  let signInUrl = '/sign-in';
+  let signUpUrl = '/sign-up';
+  let dashboardUrl = '/dashboard';
 
-  // Validate that the incoming `locale` parameter is valid
-  if (!AllLocales.includes(props.params.locale)) notFound();
+  if (locale !== AppConfig.defaultLocale) {
+    signInUrl = `/${locale}${signInUrl}`;
+    signUpUrl = `/${locale}${signUpUrl}`;
+    dashboardUrl = `/${locale}${dashboardUrl}`;
+  }
 
   // Using internationalization in Client Components
   const messages = useMessages();
 
   return (
-    <html lang={props.params.locale}>
+    <html lang={locale}>
       <body className="bg-background text-foreground antialiased">
-        <NextIntlClientProvider
-          locale={props.params.locale}
-          messages={messages}
+        <ClerkProvider
+          publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+          localization={clerkLocale}
+          signInUrl={signInUrl}
+          signUpUrl={signUpUrl}
+          signInFallbackRedirectUrl={dashboardUrl}
+          signUpFallbackRedirectUrl={dashboardUrl}
         >
-          {props.children}
-        </NextIntlClientProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            {children}
+          </NextIntlClientProvider>
+        </ClerkProvider>
       </body>
     </html>
   );
 }
-
-// Enable edge runtime but you are required to disable the `migrate` function in `src/libs/DB.ts`
-// Unfortunately, this also means it will also disable the automatic migration of the database
-// And, you will have to manually migrate it with `drizzle-kit push`
-// export const runtime = 'edge';
