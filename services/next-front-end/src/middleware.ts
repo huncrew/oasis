@@ -50,6 +50,14 @@ export default function middleware(
           });
         }
 
+        // TO DO - LOGIC TO CHECK STRIPE SIGN-UP.
+        // const isUserSignedUpWithStripe = false
+        
+        // if (!isUserSignedUpWithStripe) {
+        //   const pricingUrl = new URL('/pricing', req.url);
+        //   return NextResponse.redirect(pricingUrl);
+        // }
+
         if (
           authObj.userId &&
           !authObj.orgId &&

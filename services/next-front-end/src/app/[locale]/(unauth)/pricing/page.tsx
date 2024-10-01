@@ -1,5 +1,4 @@
 "use client";
-
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { PriceId } from '@/components/CheckoutForm';
@@ -9,11 +8,19 @@ import { Section } from '@/features/landing/Section';
 import { PLAN_ID } from '@/utils/AppConfig';
 import { Navbar } from '@/templates/Navbar';
 import CheckoutForm from '@/components/CheckoutForm'; // Import the checkout form
+import { useUser } from '@clerk/nextjs';
+
 
 
 const Pricing: React.FC = () => {
   console.log('Publishable Key:', process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
+  const { user } = useUser();
+
+  if (user) {
+    console.log('user???', user.id);
+  }
+  
   const namespace = 'CustomerFeedback'; // Define internally
   const t = useTranslations(namespace);
   const [showCheckout, setShowCheckout] = useState(false);
