@@ -79,6 +79,14 @@ export class ApiStack extends Stack {
       new LambdaIntegration(authHandler),
     );
 
+    // get access token?
+    const intercomAccess = this.api.root.addResource('intercom-callback');
+
+    intercomAccess.addMethod(
+      'GET',
+      new LambdaIntegration(authHandler),
+    );
+
     // // STEP STATUS CHECK
     // const stepStatusCheckResource =
     //   this.api.root.addResource('step-status-check');
