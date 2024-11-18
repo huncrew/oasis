@@ -22,6 +22,14 @@ const Sidebar: React.FC<{ activeTab: string; setActiveTab: (tab: string) => void
 }) => (
   <div className="w-64 bg-card p-4">
     <nav className="space-y-2">
+    <button
+        onClick={() => setActiveTab('Crypto')}
+        className={`w-full text-left px-4 py-2 rounded ${
+          activeTab === 'Crypto' ? 'bg-primary text-white' : 'text-foreground'
+        }`}
+      >
+        Crypto
+      </button>
       <button
         onClick={() => setActiveTab('Overview')}
         className={`w-full text-left px-4 py-2 rounded ${
@@ -50,7 +58,140 @@ const Sidebar: React.FC<{ activeTab: string; setActiveTab: (tab: string) => void
   </div>
 );
 
+interface CoinRecommendation {
+  id: string;
+  name: string;
+  symbol: string;
+  totalScore: string;
+  priceDipScore?: string;
+  priceStabilityScore?: string;
+  volumeIncreaseScore: string;
+  percent_change_24h?: string;
+  percent_change_14d?: string;
+  volume_change_7d?: string;
+  currentPrice: string;
+  stopLossPrice: string;
+  targetSellPrice: string;
+  coinLink: string;
+}
 
+const CryptoRecommendations: React.FC = () => {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchRecommendations = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AWS_API_URL}/crypto`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
+      const result = await response.json();
+
+
+      console.log('consoling the result', result)
+      setData(result);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderTable = (coins: CoinRecommendation[], strategyName: string) => (
+    <div key={strategyName} className="mb-8">
+      <h3 className="text-lg font-semibold text-primary mb-2">{strategyName}</h3>
+      <table className="min-w-full">
+        <thead>
+          <tr>
+            <th className="px-4 py-2 text-left">Rank</th>
+            <th className="px-4 py-2 text-left">Coin</th>
+            <th className="px-4 py-2 text-left">Score</th>
+            {strategyName === 'Buying Dips' && (
+              <th className="px-4 py-2 text-left">Price Dip Score</th>
+            )}
+            {strategyName === 'Flatliners' && (
+              <th className="px-4 py-2 text-left">Price Stability Score</th>
+            )}
+            <th className="px-4 py-2 text-left">Volume Increase Score</th>
+            <th className="px-4 py-2 text-left">Current Price</th>
+            <th className="px-4 py-2 text-left">Stop Loss</th>
+            <th className="px-4 py-2 text-left">Target Sell</th>
+            <th className="px-4 py-2 text-left">Link</th>
+          </tr>
+        </thead>
+        <tbody>
+          {coins.map((coin, index) => (
+            <tr key={coin.id}>
+              <td className="px-4 py-2">{index + 1}</td>
+              <td className="px-4 py-2">
+                {coin.name} ({coin.symbol})
+              </td>
+              <td className="px-4 py-2">{coin.totalScore}</td>
+              {strategyName === 'Buying Dips' && (
+                <td className="px-4 py-2">{coin.priceDipScore}</td>
+              )}
+              {strategyName === 'Flatliners' && (
+                <td className="px-4 py-2">{coin.priceStabilityScore}</td>
+              )}
+              <td className="px-4 py-2">{coin.volumeIncreaseScore}</td>
+              <td className="px-4 py-2">${coin.currentPrice}</td>
+              <td className="px-4 py-2">${coin.stopLossPrice}</td>
+              <td className="px-4 py-2">${coin.targetSellPrice}</td>
+              <td className="px-4 py-2">
+                <a href={coin.coinLink} target="_blank" rel="noopener noreferrer">
+                  View
+                </a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  return (
+    <div className="bg-card p-5 rounded-md">
+      <h2 className="text-xl font-semibold text-primary">Crypto Recommendations</h2>
+      <button
+        onClick={fetchRecommendations}
+        className="mt-4 px-4 py-2 bg-primary text-white rounded"
+      >
+        Fetch Recommendations
+      </button>
+      {loading && <p>Loading...</p>}
+      {error && <p>Error: {error}</p>}
+      {data && (
+      <>
+      {[
+        'buyingDips',
+        'flatliners',
+        'shortTermFlatliners',
+        'decliningFlatliners',
+        'bitcoinInfluencedCoins',
+      ].map((strategyKey) => {
+        const coins = data[strategyKey] || []; // Default to an empty array if undefined
+        if (coins.length > 0) {
+          const strategyName = {
+            buyingDips: 'Buying Dips',
+            flatliners: 'Flatliners',
+            shortTermFlatliners: 'Short-Term Flatliners',
+            decliningFlatliners: 'Declining Flatliners',
+            bitcoinInfluencedCoins: 'Bitcoin Influenced Coins',
+          }[strategyKey];
+
+          return renderTable(coins, strategyName as string);
+        } else {
+          return null;
+        }
+      })}
+      </>
+    )}
+    </div>
+  );
+};
 
 interface Job {
   jobId: string;
@@ -205,7 +346,7 @@ interface AnalysisResult {
 }
 
 const DashboardIndexPage = () => {
-  const [activeTab, setActiveTab] = useState('Overview');
+  const [activeTab, setActiveTab] = useState('Crypto');
   // const [latestJob, setLatestJob] = useState(null);
   // const [loading, setLoading] = useState(true);
   // const [error, setError] = useState<string | null>(null);
@@ -271,6 +412,7 @@ const DashboardIndexPage = () => {
       <div className="flex">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         <div className="w-full p-4">
+        {activeTab === 'Crypto' && <CryptoRecommendations />}
         {activeTab === 'Overview' && (
     <>
               {/* Flex container for TimeFrameSelector and FileUpload */}

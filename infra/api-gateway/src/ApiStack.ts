@@ -39,6 +39,16 @@ export class ApiStack extends Stack {
     const authHandler = importLambda('ApigwLambda', props.apigwLambda);
 
 
+    // crypto
+    // get access token?
+    const crypto = this.api.root.addResource('crypto');
+
+    crypto.addMethod(
+      'GET',
+      new LambdaIntegration(authHandler),
+    );
+
+
     // stripe
     const stepCreateResource = this.api.root.addResource('stripe-checkout');
     

@@ -26,7 +26,8 @@ export class LambdaStack extends Stack {
       entry: `${props.lambdaCodePath}/apigw-requests/index.ts`,
       environment: {
         STRIPE_SECRET_KEY: config.STRIPE_SECRET_KEY,
-        OPENAI_KEY: config.OPENAI_KEY
+        OPENAI_KEY: config.OPENAI_KEY,
+        COINMARKETCAP_API_KEY: config.COINMARKETCAP_API_KEY
       },
       timeout: Duration.seconds(90), // Set timeout to 90 seconds
     });
