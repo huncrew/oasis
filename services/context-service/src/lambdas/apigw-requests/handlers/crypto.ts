@@ -5,6 +5,7 @@ interface Coin {
   name: string;
   symbol: string;
   slug: string;
+  market_cap: number
 }
 
 interface HistoricalQuote {
@@ -23,7 +24,7 @@ export const cryptoHandler = async (event: any = {}): Promise<any> => {
       }
   
       // Categories to process
-      const categoryNames = ['Gaming', 'AI & Big Data', 'Memes'];
+      const categoryNames = ['Gaming', 'AI & Big Data'];
   
       // Get category IDs
       const categoryIdMap = await getCategoryIds(categoryNames, coinMarketCapApiKey);
@@ -169,49 +170,45 @@ async function getHistoricalDataForCoins(
 
 // Function to process coins and find those matching each strategy
 function processCoins(
-    historicalData: any,
-    coinIdMap: { [key: string]: Coin }
-  ): any {
-    const buyingDipsCoins: any[] = [];
-    const flatlinersCoins: any[] = [];
-  
-    for (const coinId in historicalData) {
-      const coinData = historicalData[coinId];
-      const quotes = coinData.quotes;
-      const coinInfo = coinIdMap[parseInt(coinId)];
-  
-      if (!coinInfo || quotes.length < 2) continue;
-  
-      // Calculate price and volume changes
-      const priceStart = quotes[0].quote.USD.price;
-      const priceEnd = quotes[quotes.length - 1].quote.USD.price;
-      const priceChangePercent = ((priceEnd - priceStart) / priceStart) * 100;
-  
-      const volumeStart = quotes[0].quote.USD.volume_24h;
-      const volumeEnd = quotes[quotes.length - 1].quote.USD.volume_24h;
-  
-      // Strategy 1: Buying Dips (Volatile Coins Near Recent Lows)
+  historicalData: any,
+  coinIdMap: { [key: string]: Coin }
+): any {
+  const buyingDipsCoins: any[] = [];
+  const flatlinersCoins: any[] = [];
 
-    // Collect prices over the last 7 days
+  for (const coinId in historicalData) {
+    const coinData = historicalData[coinId];
+    const quotes = coinData.quotes;
+    const coinInfo = coinIdMap[parseInt(coinId)];
+
+    if (!coinInfo || quotes.length < 2) continue;
+
+    // Convert market cap to a number
+    const marketCap = Number(coinInfo.market_cap);
+    if (!marketCap || marketCap > 2000000000) continue; // Skip coins with market cap > $2 billion
+
+    // Calculate price and volume changes
+    const priceStart = quotes[0].quote.USD.price;
+    const priceEnd = quotes[quotes.length - 1].quote.USD.price;
+    const priceChangePercent = ((priceEnd - priceStart) / priceStart) * 100;
+
+    const volumeStart = quotes[0].quote.USD.volume_24h;
+    const volumeEnd = quotes[quotes.length - 1].quote.USD.volume_24h;
+
+    // Strategy 1: Buying Dips (Volatile Coins Near Recent Lows)
     const pricesLast7Days = quotes.slice(-7).map((quote: any) => quote.quote.USD.price);
 
     const priceHigh = Math.max(...pricesLast7Days);
     const priceLow = Math.min(...pricesLast7Days);
     const currentPrice = pricesLast7Days[pricesLast7Days.length - 1];
 
-    // Calculate price swing over the last 7 days
     const priceSwing = ((priceHigh - priceLow) / priceLow) * 100;
-
-    // Calculate price position in the 7-day range
     const pricePosition = ((currentPrice - priceLow) / (priceHigh - priceLow)) * 100;
 
-    // Apply thresholds
     if (priceSwing >= 20 && pricePosition <= 30) {
-      // Calculate scores
-      const volatilityScore = Math.min(priceSwing / 50, 1); // Max score when swing is 50% or more
-      const pricePositionScore = 1 - (pricePosition / 30); // Higher score when price is closer to the low
+      const volatilityScore = Math.min(priceSwing / 50, 1);
+      const pricePositionScore = 1 - (pricePosition / 30);
 
-      // Total score with weights
       const totalScore = (volatilityScore * 0.6) + (pricePositionScore * 0.4);
 
       buyingDipsCoins.push({
@@ -224,64 +221,67 @@ function processCoins(
         priceSwing: priceSwing.toFixed(2),
         pricePosition: pricePosition.toFixed(2),
         currentPrice: currentPrice.toFixed(4),
-        stopLossPrice: (currentPrice * 0.95).toFixed(4), // 5% stop loss
-        targetSellPrice: (currentPrice * 1.10).toFixed(4), // 10% gain
+        stopLossPrice: (currentPrice * 0.95).toFixed(4),
+        targetSellPrice: (currentPrice * 1.10).toFixed(4),
         coinLink: `https://coinmarketcap.com/currencies/${coinInfo.slug}`,
       });
     }
-  
-      // Strategy 2: Flatliners
-      // Identify coins with minimal price movement over the last 14 days and increasing volume
-      const priceChanges = [];
-      for (let i = 1; i < quotes.length; i++) {
-        const prevQuote = quotes[i - 1];
-        const currQuote = quotes[i];
-        const priceChange = ((currQuote.quote.USD.price - prevQuote.quote.USD.price) / prevQuote.quote.USD.price) * 100;
-        priceChanges.push(priceChange);
-      }
-  
-      const maxPriceChange = Math.max(...priceChanges.map(Math.abs));
-  
-      if (maxPriceChange <= 15) {
-        // Check if volume has increased gradually over the last 7 days
-        const volumeStartIndex = quotes.length - 8 >= 0 ? quotes.length - 8 : 0;
-        const volumeStart7d = quotes[volumeStartIndex].quote.USD.volume_24h;
-        const volumeEnd7d = volumeEnd;
-        const volumeChange7dPercent = ((volumeEnd7d - volumeStart7d) / volumeStart7d) * 100;
-  
-        if (volumeChange7dPercent > 5) {
-          // Calculate scores
-          const priceStabilityScore = 1 - (maxPriceChange / 15); // Normalize between 0 and 1
-          const volumeIncreaseScore = Math.min(volumeChange7dPercent / 100, 1); // Max score if volume increased by 100% or more
-  
-          // Total score for flatliners strategy
-          const totalScore = (priceStabilityScore * 0.6) + (volumeIncreaseScore * 0.4);
-  
-          flatlinersCoins.push({
-            id: coinId,
-            name: coinInfo.name,
-            symbol: coinInfo.symbol,
-            totalScore: totalScore.toFixed(4),
-            priceStabilityScore: priceStabilityScore.toFixed(4),
-            volumeIncreaseScore: volumeIncreaseScore.toFixed(4),
-            percent_change_14d: priceChangePercent.toFixed(2),
-            volume_change_7d: volumeChange7dPercent.toFixed(2),
-            currentPrice: priceEnd.toFixed(4),
-            stopLossPrice: (priceEnd * 0.97).toFixed(4), // 3% stop loss
-            targetSellPrice: (priceEnd * 1.15).toFixed(4), // 15% gain
-            coinLink: `https://coinmarketcap.com/currencies/${coinInfo.slug}`,
-          });
-        }
+
+    // Strategy 2: Flatliners
+    const priceChanges = [];
+    for (let i = 1; i < quotes.length; i++) {
+      const prevQuote = quotes[i - 1];
+      const currQuote = quotes[i];
+      const priceChange = ((currQuote.quote.USD.price - prevQuote.quote.USD.price) / prevQuote.quote.USD.price) * 100;
+      priceChanges.push(priceChange);
+    }
+
+    const maxPriceChange = Math.max(...priceChanges.map(Math.abs));
+
+    if (maxPriceChange > 10) continue; // Ensure price is stable within 10%
+
+    const volumeSpikes = quotes.slice(-3).some((quote, i, arr) => {
+      if (i === 0) return false;
+      const prevVolume = arr[i - 1].quote.USD.volume_24h;
+      return quote.quote.USD.volume_24h > prevVolume * 1.5; // 50% volume spike
+    });
+
+    if (volumeSpikes) {
+      const volumeStartIndex = quotes.length - 8 >= 0 ? quotes.length - 8 : 0;
+      const volumeStart7d = quotes[volumeStartIndex].quote.USD.volume_24h;
+      const volumeChange7dPercent = ((volumeEnd - volumeStart7d) / volumeStart7d) * 100;
+
+      if (volumeChange7dPercent > 5) {
+        const priceStabilityScore = 1 - (maxPriceChange / 10);
+        const volumeIncreaseScore = Math.min(volumeChange7dPercent / 100, 1);
+
+        const totalScore = (priceStabilityScore * 0.6) + (volumeIncreaseScore * 0.4);
+
+        flatlinersCoins.push({
+          id: coinId,
+          name: coinInfo.name,
+          symbol: coinInfo.symbol,
+          totalScore: totalScore.toFixed(4),
+          priceStabilityScore: priceStabilityScore.toFixed(4),
+          volumeIncreaseScore: volumeIncreaseScore.toFixed(4),
+          maxPriceChange: maxPriceChange.toFixed(2),
+          volumeChange7d: volumeChange7dPercent.toFixed(2),
+          currentPrice: priceEnd.toFixed(4),
+          stopLossPrice: (priceEnd * 0.97).toFixed(4),
+          targetSellPrice: (priceEnd * 1.15).toFixed(4),
+          coinLink: `https://coinmarketcap.com/currencies/${coinInfo.slug}`,
+        });
       }
     }
-  
-    // Sort the lists by totalScore in descending order
-    buyingDipsCoins.sort((a, b) => parseFloat(b.totalScore) - parseFloat(a.totalScore));
-    flatlinersCoins.sort((a, b) => parseFloat(b.totalScore) - parseFloat(a.totalScore));
-  
-    return {
-      buyingDips: buyingDipsCoins,
-      flatliners: flatlinersCoins,
-    };
   }
-  
+
+  // Sort the lists by totalScore in descending order
+  buyingDipsCoins.sort((a, b) => parseFloat(b.totalScore) - parseFloat(a.totalScore));
+  flatlinersCoins.sort((a, b) => parseFloat(b.totalScore) - parseFloat(a.totalScore));
+
+  return {
+    buyingDips: buyingDipsCoins,
+    flatliners: flatlinersCoins,
+  };
+}
+
